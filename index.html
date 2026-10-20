@@ -2,284 +2,513 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>B3A · Fu Tai Estate ⇄ Shenzhen Bay Port</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070c">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Live next-bus times for Citybus route B3A between Fu Tai Estate and Shenzhen Bay Port, plus the published timetable. 城巴 B3A 富泰邨 ↔ 深圳灣口岸 實時到站時間。">
+<title>Next B3A · Fu Tai Estate ⇄ Shenzhen Bay Port</title>
 <style>
   :root {
-    --bus-red: #c8102e;
-    --ink: #101828;
-    --muted: #667085;
-    --line: #e4e7ec;
-    --bg: #f2f4f7;
+    --bg: #05070c;
+    --ink: #e8eef7;
+    --muted: #8b9bb4;
+    --dim: #8595ad;
+    --amber: #ffb020;
+    --amber-2: #ff7a18;
+    --cyan: #22d3ee;
+    --red: #ff2d55;
+    --green: #22c55e;
+    --led-bg: #070b12;
+    --line: rgba(255, 255, 255, .07);
+    --panel: linear-gradient(160deg, rgba(24, 33, 49, .92), rgba(9, 13, 21, .94));
   }
+
   * { box-sizing: border-box; }
+
   body {
     margin: 0;
     min-height: 100vh;
+    padding: 20px 14px 34px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 24px;
-    background: radial-gradient(1200px 600px at 50% -10%, #dfe6f0, var(--bg));
+    background: var(--bg);
     color: var(--ink);
-    font-family: system-ui, "Segoe UI", "Microsoft JhengHei", sans-serif;
+    font-family: system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", "Noto Sans HK", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-  .board {
-    width: 100%;
-    max-width: 580px;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 18px 50px rgba(16, 24, 40, .18);
+
+  /* ---------- atmosphere ---------- */
+  .blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .blob {
+    position: absolute;
+    width: 46vmax; height: 46vmax;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: .42;
+    will-change: transform;
+  }
+  .blob.a { background: radial-gradient(circle, #ff2d55, transparent 64%); top: -20vmax; left: -14vmax; animation: float1 26s ease-in-out infinite; }
+  .blob.b { background: radial-gradient(circle, #1b6bff, transparent 64%); bottom: -22vmax; right: -16vmax; animation: float2 32s ease-in-out infinite; }
+  .blob.c { background: radial-gradient(circle, #ffb020, transparent 62%); top: 30%; left: 58%; width: 30vmax; height: 30vmax; opacity: .22; animation: float3 24s ease-in-out infinite; }
+  @keyframes float1 { 50% { transform: translate(7vmax, 5vmax) scale(1.12); } }
+  @keyframes float2 { 50% { transform: translate(-6vmax, -7vmax) scale(1.08); } }
+  @keyframes float3 { 50% { transform: translate(-8vmax, 4vmax) scale(.9); } }
+
+  .grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(120, 170, 255, .055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120, 170, 255, .055) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(circle at 50% 12%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(circle at 50% 12%, #000 0%, transparent 72%);
+  }
+
+  .board { position: relative; z-index: 1; width: 100%; max-width: 600px; display: grid; gap: 13px; }
+
+  /* ---------- header ---------- */
+  .head {
+    position: relative;
+    padding: 18px 20px 20px;
+    border-radius: 22px;
+    background: linear-gradient(148deg, rgba(255, 45, 85, .18), rgba(16, 22, 34, .94) 52%, rgba(9, 13, 21, .96));
+    border: 1px solid rgba(255, 255, 255, .085);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .07);
     overflow: hidden;
   }
-  header {
-    background: var(--bus-red);
-    color: #fff;
-    padding: 20px 24px 22px;
+  .head::before {
+    content: "";
+    position: absolute; inset: 0 0 auto 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--amber), transparent);
+    opacity: .85;
   }
-  .route {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-  .badge {
-    background: #fff;
-    color: var(--bus-red);
-    font-weight: 800;
-    font-size: 22px;
-    letter-spacing: .5px;
-    padding: 4px 12px;
-    border-radius: 8px;
-    line-height: 1.2;
-  }
-  .operator {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: .14em;
-    opacity: .9;
-  }
-  .journey {
-    font-size: 21px;
-    font-weight: 650;
-    line-height: 1.35;
-  }
-  .journey .arrow { opacity: .75; padding: 0 4px; }
-  .zh {
-    margin-top: 4px;
-    font-size: 15px;
-    opacity: .9;
-  }
-  .live { border-bottom: 1px solid var(--line); }
-  .dir-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 18px 24px 0;
-  }
-  .dir-title { font-size: 17px; font-weight: 650; }
-  .dir-zh { font-size: 13px; color: var(--muted); white-space: nowrap; }
-  .dir-stop {
-    padding: 3px 24px 6px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  ul.etas { list-style: none; margin: 0; padding: 0 24px 8px; }
-  ul.etas li {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 0;
-    border-top: 1px solid var(--line);
-  }
-  ul.etas li:first-child { border-top: 0; }
-  .mins {
-    font-size: 38px;
-    font-weight: 750;
-    line-height: 1;
-    color: var(--bus-red);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -.5px;
-  }
-  .mins small {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--muted);
-    margin-left: 6px;
-    letter-spacing: 0;
-  }
-  .mins.due { font-size: 28px; }
-  .meta {
-    text-align: right;
-    font-size: 14px;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-  }
-  .meta .tag {
-    display: inline-block;
-    margin-top: 4px;
-    font-size: 11px;
-    letter-spacing: .04em;
-    color: #b42318;
-    background: #fef3f2;
-    border-radius: 999px;
-    padding: 2px 8px;
-  }
-  .state {
-    padding: 18px 0 16px;
-    color: var(--muted);
-    font-size: 14px;
-    text-align: center;
-  }
-  .state.error { color: #b42318; }
 
-  .schedule { padding: 20px 24px 22px; }
-  .sched-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
+  .eyebrow {
+    display: flex; align-items: center; gap: 8px;
+    font: 700 10.5px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+    color: var(--amber);
+    text-shadow: 0 0 10px rgba(255, 176, 32, .55);
   }
-  .sched-head h2 { margin: 0; font-size: 17px; font-weight: 650; }
-  .sched-head .dir-zh { font-size: 13px; }
-  .sched-sub {
-    margin: 3px 0 0;
-    font-size: 13px;
-    color: var(--muted);
+
+  .route { display: flex; align-items: center; gap: 12px; margin: 12px 0 10px; }
+
+  .badge {
+    position: relative;
+    padding: 7px 15px 9px;
+    border-radius: 11px;
+    background: var(--led-bg);
+    border: 1px solid rgba(255, 176, 32, .38);
+    box-shadow: 0 0 22px rgba(255, 176, 32, .18), inset 0 0 24px rgba(255, 176, 32, .09);
+    isolation: isolate;
   }
-  .tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 14px 0 6px;
+  .badge .num {
+    display: block;
+    font: 800 30px/1 ui-monospace, "Cascadia Mono", Consolas, monospace;
+    letter-spacing: .14em;
+    color: var(--amber);
+    text-shadow: 0 0 6px rgba(255, 176, 32, .95), 0 0 22px rgba(255, 122, 24, .7);
   }
+  /* punched-dot LED matrix overlay */
+  .badge::after {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 50% 50%, transparent 0 34%, rgba(7, 11, 18, .97) 36% 100%);
+    background-size: 4px 4px;
+  }
+
+  .operator {
+    font: 600 10px/1.4 ui-monospace, monospace;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .operator b { display: block; color: var(--muted); font-weight: 600; letter-spacing: .16em; }
+
+  .journey { font-size: 20px; font-weight: 650; letter-spacing: -.012em; line-height: 1.25; }
+  .journey .arrow { color: var(--red); text-shadow: 0 0 14px rgba(255, 45, 85, .85); padding: 0 2px; }
+  .zh { margin-top: 3px; font-size: 13px; color: var(--muted); letter-spacing: .02em; }
+
+  /* ---------- direction card ---------- */
+  .dir {
+    position: relative;
+    padding: 15px 17px 14px;
+    border-radius: 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .48), inset 0 1px 0 rgba(255, 255, 255, .05);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    overflow: hidden;
+    transition: box-shadow .4s ease, border-color .4s ease;
+  }
+  .dir::after {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(130deg, rgba(34, 211, 238, .55), rgba(255, 45, 85, .18) 42%, transparent 72%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: .65;
+    pointer-events: none;
+  }
+
+  .dir-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .dir-head h2 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.005em; }
+  .dir-head .dir-zh { font-size: 12px; color: var(--dim); }
+  .dir-stop { margin: 3px 0 12px; font-size: 11.5px; color: var(--muted); }
+
+  .hero { display: flex; align-items: center; gap: 16px; }
+
+  .ring { position: relative; flex: 0 0 104px; width: 104px; height: 104px; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+  .ring-bg { fill: none; stroke: rgba(255, 255, 255, .07); stroke-width: 8; }
+  .ring-fg {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset .85s cubic-bezier(.22, 1, .36, 1), stroke .35s ease;
+  }
+  .dir.warm .ring-fg { stroke: var(--amber); }
+  .dir.hot .ring-fg { stroke: var(--red); }
+  .dir.due .ring-fg { stroke: #fff; filter: drop-shadow(0 0 9px var(--red)); }
+
+  .ring-in { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; text-align: center; }
+  .odo { height: 40px; overflow: hidden; }
+  .odo-strip {
+    display: block;
+    font: 800 40px/40px ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    transition: transform .7s cubic-bezier(.22, 1, .36, 1);
+  }
+  .odo-strip span { display: block; height: 1em; }
+  .unit {
+    margin-top: 2px;
+    font: 700 9.5px/1 ui-monospace, monospace;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .due-word { display: none; font: 800 25px/1 ui-monospace, monospace; letter-spacing: .1em; color: #fff; text-shadow: 0 0 18px var(--red); }
+  .dir.due .odo, .dir.due .unit { display: none; }
+  .dir.due .due-word { display: block; }
+
+  .hero-meta { min-width: 0; flex: 1; }
+  .clock {
+    font: 700 16px/1.2 ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    letter-spacing: .04em;
+  }
+  .clock small { display: block; margin-top: 2px; font: 600 9.5px/1 ui-monospace, monospace; letter-spacing: .2em; color: var(--dim); }
+  .remark {
+    margin-top: 7px;
+    font-size: 11px;
+    color: var(--cyan);
+    min-height: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .remark:empty { display: none; }
+
+  /* ---------- rail ---------- */
+  .track { position: relative; height: 24px; margin: 8px 3px 4px; }
+  .rail {
+    position: absolute; left: 0; right: 0; top: 50%; height: 2px;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    background: linear-gradient(90deg, rgba(34, 211, 238, .1), rgba(34, 211, 238, .65));
+    box-shadow: 0 0 12px rgba(34, 211, 238, .25);
+  }
+  .rail::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, .22) 0 1px, transparent 1px 14px);
+    opacity: .35;
+  }
+  .stop {
+    position: absolute; right: 0; top: 50%;
+    width: 11px; height: 11px;
+    transform: translate(3px, -50%);
+    border-radius: 50%;
+    background: #08101c;
+    border: 2px solid var(--cyan);
+    box-shadow: 0 0 12px rgba(34, 211, 238, .85);
+  }
+  .bus {
+    position: absolute; left: 0; top: 50%;
+    transform: translate(-50%, -50%);
+    transition: left .85s cubic-bezier(.22, 1, .36, 1);
+    filter: drop-shadow(0 0 7px rgba(255, 176, 32, .85));
+    line-height: 0;
+  }
+
+  /* ---------- next departures ---------- */
+  .rows { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+  .rows li {
+    display: flex; align-items: baseline; gap: 9px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .035);
+    border: 1px solid rgba(255, 255, 255, .05);
+    font-size: 12.5px;
+  }
+  .rows .m { font: 700 16px/1 ui-monospace, monospace; font-variant-numeric: tabular-nums; color: var(--amber); min-width: 2ch; }
+  .rows .u { font: 700 9px/1 ui-monospace, monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+  .rows .t { margin-left: auto; font: 600 12px/1 ui-monospace, monospace; color: var(--muted); }
+  .rows .tag { font: 600 10px/1 ui-monospace, monospace; letter-spacing: .06em; color: var(--cyan); background: rgba(34, 211, 238, .12); border-radius: 999px; padding: 3px 7px; }
+  .rows li.state { justify-content: center; color: var(--muted); font-size: 12px; }
+  .rows li.state.error { color: #ffb4c2; }
+
+  .sk {
+    height: 12px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, .05) 22%, rgba(255, 255, 255, .16) 40%, rgba(255, 255, 255, .05) 58%);
+    background-size: 320% 100%;
+    animation: shimmer 1.35s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 120% 0; } 100% { background-position: -60% 0; } }
+
+  /* ---------- arrival flash ---------- */
+  .dir.flash { animation: thump .95s ease-in-out 1; }
+  @keyframes thump {
+    0%, 100% { box-shadow: 0 18px 44px rgba(0, 0, 0, .48), 0 0 0 rgba(255, 45, 85, 0); border-color: var(--line); }
+    35% { box-shadow: 0 18px 60px rgba(255, 45, 85, .5), 0 0 42px rgba(255, 45, 85, .55); border-color: rgba(255, 45, 85, .8); }
+  }
+
+  /* ---------- timetable ---------- */
+  .sched { padding: 15px 17px 16px; }
+  .sched-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .sched-head h2 { margin: 0; font-size: 15px; font-weight: 650; }
+  .sched-head .dir-zh { font-size: 12px; color: var(--dim); }
+  .sched-sub { margin: 4px 0 0; font-size: 11.5px; color: var(--muted); }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 13px 0 8px; }
   .tab {
     font: inherit;
-    font-size: 12.5px;
+    font-size: 11.5px;
     padding: 6px 11px;
     border-radius: 999px;
-    border: 1px solid var(--line);
-    background: #fff;
+    border: 1px solid rgba(255, 255, 255, .1);
+    background: rgba(255, 255, 255, .035);
     color: var(--muted);
     cursor: pointer;
-    transition: background .15s, color .15s, border-color .15s;
+    transition: color .16s, background .16s, border-color .16s, box-shadow .16s;
   }
-  .tab:hover { border-color: #cfd4dc; color: var(--ink); }
+  .tab:hover { color: var(--ink); border-color: rgba(255, 255, 255, .22); }
+  .tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
   .tab[aria-selected="true"] {
-    background: var(--ink);
-    border-color: var(--ink);
     color: #fff;
+    background: linear-gradient(135deg, var(--red), var(--amber-2));
+    border-color: transparent;
+    box-shadow: 0 0 18px rgba(255, 45, 85, .45);
   }
-  .bands { list-style: none; margin: 8px 0 0; padding: 0; }
+
+  .bands { list-style: none; margin: 6px 0 0; padding: 0; }
   .bands li {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 9px 10px 9px 12px;
-    margin-left: 2px;
-    border-left: 3px solid #eaecf0;
-    font-size: 14px;
-  }
-  .bands li.now {
-    border-left-color: var(--bus-red);
-    background: #fff5f6;
-    border-radius: 0 8px 8px 0;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding: 8px 10px;
+    margin: 1px 0;
+    border-left: 2px solid rgba(140, 170, 210, .18);
+    font-size: 13.5px;
+    color: #c7d3e4;
   }
   .bands .when { font-variant-numeric: tabular-nums; }
-  .bands .when .sep { color: #98a2b3; padding: 0 3px; }
-  .bands .freq { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .bands li.now .freq { color: var(--ink); font-weight: 600; }
+  .bands .when .sep { color: var(--dim); padding: 0 3px; }
+  .bands .freq { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .bands li.now {
+    border-left-color: var(--amber);
+    background: linear-gradient(90deg, rgba(255, 176, 32, .16), rgba(255, 176, 32, 0) 72%);
+    border-radius: 0 10px 10px 0;
+    color: #fff;
+  }
+  .bands li.now .freq { color: var(--amber); font-weight: 600; }
   .nowpill {
     display: inline-block;
     margin-left: 7px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: #fff;
-    background: var(--bus-red);
-    border-radius: 999px;
     padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--amber);
+    color: #101010;
+    font: 800 9px/1.4 ui-monospace, monospace;
+    letter-spacing: .14em;
+    text-transform: uppercase;
     vertical-align: 1px;
+    box-shadow: 0 0 14px rgba(255, 176, 32, .75);
   }
-  .sched-note {
-    margin: 14px 0 0;
-    font-size: 12px;
-    line-height: 1.55;
-    color: var(--muted);
-  }
-  .sched-note a { color: #475467; }
+  .sched-note { margin: 13px 0 0; font-size: 11.5px; line-height: 1.6; color: var(--dim); }
+  .sched-note a { color: var(--cyan); }
 
+  /* ---------- footer ---------- */
   footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 14px 24px;
-    background: #f9fafb;
-    border-top: 1px solid var(--line);
-    font-size: 12px;
-    color: var(--muted);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 2px 6px;
+    font: 600 10.5px/1.5 ui-monospace, monospace;
+    letter-spacing: .08em;
+    color: var(--dim);
+    text-transform: uppercase;
   }
-  .pulse {
-    display: inline-block;
-    width: 7px; height: 7px;
-    margin-right: 6px;
+  .live { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); }
+  .radar { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .radar::before, .radar::after {
+    content: "";
+    position: absolute; inset: 0;
     border-radius: 50%;
-    background: #12b76a;
-    animation: pulse 2s ease-in-out infinite;
+    border: 1px solid rgba(34, 197, 94, .75);
+    animation: ping 2.6s ease-out infinite;
   }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+  .radar::after { animation-delay: 1.3s; }
+  @keyframes ping { 0% { transform: scale(1); opacity: .85; } 100% { transform: scale(4); opacity: 0; } }
+
+  /* ---------- small screens ---------- */
   @media (max-width: 420px) {
-    body { padding: 12px; }
+    body { padding: 12px 10px 26px; }
+    .head { padding: 15px 16px 17px; border-radius: 18px; }
     .journey { font-size: 18px; }
-    .mins { font-size: 32px; }
-    ul.etas { padding-left: 18px; padding-right: 18px; }
-    .dir-head, .dir-stop, .schedule, header, footer { padding-left: 18px; padding-right: 18px; }
-    .bands li { font-size: 13px; }
+    .dir, .sched { padding-left: 14px; padding-right: 14px; }
+    .ring { flex-basis: 92px; width: 92px; height: 92px; }
+    .odo { height: 34px; }
+    .odo-strip { font-size: 34px; line-height: 34px; }
+    .due-word { font-size: 22px; }
+    .bands li { font-size: 12.5px; }
+  }
+
+  /* ---------- motion / contrast guards ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    .blob { display: none; }
+  }
+  @media (prefers-contrast: more) {
+    :root { --muted: #b7c4d6; --dim: #93a3ba; }
+    .dir, .head { border-color: rgba(255, 255, 255, .3); }
   }
 </style>
 </head>
 <body>
+
+<div class="blobs" aria-hidden="true">
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="blob c"></div>
+</div>
+<div class="grid" aria-hidden="true"></div>
+
 <main class="board">
-  <header>
+
+  <header class="head">
+    <div class="eyebrow">Next departures · 下一班</div>
     <div class="route">
-      <span class="badge">B3A</span>
-      <span class="operator">Citybus</span>
+      <span class="badge"><span class="num">B3A</span></span>
+      <span class="operator"><b>Citybus</b>CTB · 城巴</span>
     </div>
-    <div class="journey">
-      Fu Tai Estate <span class="arrow">&harr;</span> Shenzhen Bay Port
-    </div>
+    <div class="journey">Fu Tai Estate <span class="arrow">&harr;</span> Shenzhen Bay Port</div>
     <div class="zh">富泰邨 &harr; 深圳灣口岸</div>
   </header>
 
-  <section class="live">
+  <section class="dir" id="board-out" data-board="board-out">
     <div class="dir-head">
-      <span class="dir-title">To Shenzhen Bay Port</span>
+      <h2>To Shenzhen Bay Port</h2>
       <span class="dir-zh">往深圳灣口岸</span>
     </div>
-    <div class="dir-stop">From Fu Tai Estate, Castle Peak Road · 富泰邨</div>
-    <ul class="etas" id="board-out" aria-live="polite">
-      <li><div class="state">Loading&hellip;</div></li>
+    <p class="dir-stop">From Fu Tai Estate, Castle Peak Road · 富泰邨</p>
+
+    <div class="hero">
+      <div class="ring">
+        <svg viewBox="0 0 104 104" aria-hidden="true">
+          <circle class="ring-bg" cx="52" cy="52" r="46"></circle>
+          <circle class="ring-fg" cx="52" cy="52" r="46"></circle>
+        </svg>
+        <div class="ring-in">
+          <div class="odo"><span class="odo-strip"></span></div>
+          <div class="unit">min</div>
+          <div class="due-word">DUE</div>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="clock">&ndash;&ndash;:&ndash;&ndash;<small>HKT · 香港時間</small></div>
+        <div class="remark"></div>
+      </div>
+    </div>
+
+    <div class="track" aria-hidden="true">
+      <div class="rail"></div>
+      <div class="bus">
+        <svg width="24" height="14" viewBox="0 0 24 14" fill="none">
+          <rect x="1" y="1" width="22" height="10" rx="3" fill="#ffb020"/>
+          <rect x="3.5" y="3.2" width="6" height="4" rx="1" fill="#0a0f18"/>
+          <rect x="11" y="3.2" width="6" height="4" rx="1" fill="#0a0f18"/>
+          <circle cx="6" cy="11.4" r="2.1" fill="#0a0f18" stroke="#ff7a18" stroke-width="1"/>
+          <circle cx="18" cy="11.4" r="2.1" fill="#0a0f18" stroke="#ff7a18" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="stop"></div>
+    </div>
+
+    <ul class="rows" aria-live="polite">
+      <li><span class="sk" style="width:100%"></span></li>
+      <li><span class="sk" style="width:72%"></span></li>
     </ul>
   </section>
 
-  <section class="live">
+  <section class="dir" id="board-in" data-board="board-in">
     <div class="dir-head">
-      <span class="dir-title">To Fu Tai Estate</span>
+      <h2>To Fu Tai Estate</h2>
       <span class="dir-zh">往富泰邨</span>
     </div>
-    <div class="dir-stop">From Shenzhen Bay Port · 深圳灣口岸</div>
-    <ul class="etas" id="board-in" aria-live="polite">
-      <li><div class="state">Loading&hellip;</div></li>
+    <p class="dir-stop">From Shenzhen Bay Port · 深圳灣口岸</p>
+
+    <div class="hero">
+      <div class="ring">
+        <svg viewBox="0 0 104 104" aria-hidden="true">
+          <circle class="ring-bg" cx="52" cy="52" r="46"></circle>
+          <circle class="ring-fg" cx="52" cy="52" r="46"></circle>
+        </svg>
+        <div class="ring-in">
+          <div class="odo"><span class="odo-strip"></span></div>
+          <div class="unit">min</div>
+          <div class="due-word">DUE</div>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="clock">&ndash;&ndash;:&ndash;&ndash;<small>HKT · 香港時間</small></div>
+        <div class="remark"></div>
+      </div>
+    </div>
+
+    <div class="track" aria-hidden="true">
+      <div class="rail"></div>
+      <div class="bus">
+        <svg width="24" height="14" viewBox="0 0 24 14" fill="none">
+          <rect x="1" y="1" width="22" height="10" rx="3" fill="#ffb020"/>
+          <rect x="3.5" y="3.2" width="6" height="4" rx="1" fill="#0a0f18"/>
+          <rect x="11" y="3.2" width="6" height="4" rx="1" fill="#0a0f18"/>
+          <circle cx="6" cy="11.4" r="2.1" fill="#0a0f18" stroke="#ff7a18" stroke-width="1"/>
+          <circle cx="18" cy="11.4" r="2.1" fill="#0a0f18" stroke="#ff7a18" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="stop"></div>
+    </div>
+
+    <ul class="rows" aria-live="polite">
+      <li><span class="sk" style="width:100%"></span></li>
+      <li><span class="sk" style="width:68%"></span></li>
     </ul>
   </section>
 
-  <section class="schedule">
+  <section class="dir sched">
     <div class="sched-head">
       <h2>Departure schedule</h2>
       <span class="dir-zh">深圳灣口岸開出</span>
@@ -298,9 +527,10 @@
   </section>
 
   <footer>
-    <span><span class="pulse"></span>Live ETA &middot; updated <span id="updated">&ndash;</span></span>
-    <span>Citybus open data, DATA.GOV.HK &middot; every 30 s</span>
+    <span class="live"><span class="radar"></span>Live ETA &middot; <span id="updated">&ndash;</span></span>
+    <span>Citybus open data · every 30s</span>
   </footer>
+
 </main>
 
 <script>
@@ -313,15 +543,20 @@
   const ROUTE = "B3A";
   const REFRESH_MS = 30000;
   const MAX_ROWS = 3;
+  const WINDOW_MIN = 45;          // minutes represented by a full progress ring
+  const RING_C = 2 * Math.PI * 46;
 
   const BOARDS = [
     { id: "board-out", stop: "003261", dir: "O" },
     { id: "board-in", stop: "003208", dir: "I" },
   ];
 
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const updatedEl = document.getElementById("updated");
-  const cache = new Map();   // board id -> { buses, lastOk }
+  const cache = new Map();        // board id -> { buses, lastOk }
+  const flashSeen = new Set();    // board id + eta already announced
 
+  /* ---------- helpers ---------- */
   const fmtClock = (d) =>
     d.toLocaleTimeString("en-GB", {
       hour: "2-digit",
@@ -330,8 +565,8 @@
       timeZone: "Asia/Hong_Kong",
     });
 
-  const minutesLeft = (eta) =>
-    Math.max(0, Math.round((eta - Date.now()) / 60000));
+  const minutesLeft = (eta) => Math.max(0, Math.round((eta - Date.now()) / 60000));
+  const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({
@@ -339,48 +574,133 @@
     }[c]));
   }
 
-  function renderBoard(board) {
-    const el = document.getElementById(board.id);
-    const entry = cache.get(board.id);
-    const buses = entry ? entry.buses : [];
+  function parts(section) {
+    return {
+      rows: section.querySelector(".rows"),
+      clock: section.querySelector(".clock"),
+      remark: section.querySelector(".remark"),
+      strip: section.querySelector(".odo-strip"),
+      ring: section.querySelector(".ring-fg"),
+      bus: section.querySelector(".bus"),
+    };
+  }
 
-    if (buses.length === 0) {
-      el.innerHTML =
-        '<li><div class="state">No upcoming B3A buses in the next hour.<br>暫時沒有班次</div></li>';
-      return;
+  /* Build the odometer strip (0-99) once per board. */
+  function buildOdometer(section) {
+    const strip = section.querySelector(".odo-strip");
+    let html = "";
+    for (let i = 0; i <= 99; i++) html += "<span>" + i + "</span>";
+    strip.innerHTML = html;
+    strip.style.transform = "translateY(0em)";
+  }
+
+  /* ---------- rendering ---------- */
+  function paintGauge(section, mins, due) {
+    const p = parts(section);
+    const value = due ? 0 : clamp(mins, 0, 99);
+    p.strip.style.transform = "translateY(" + -value + "em)";
+
+    const frac = due ? 1 : clamp(1 - value / WINDOW_MIN, 0, 1);
+    p.ring.style.strokeDasharray = RING_C.toFixed(2);
+    p.ring.style.strokeDashoffset = (RING_C * (1 - frac)).toFixed(2);
+    p.bus.style.left = (3 + frac * 92).toFixed(1) + "%";
+
+    section.classList.remove("warm", "hot", "due");
+    if (due) section.classList.add("due");
+    else if (mins <= 5) section.classList.add("hot");
+    else if (mins <= 15) section.classList.add("warm");
+  }
+
+  function skeleton(section) {
+    const p = parts(section);
+    section.classList.remove("warm", "hot", "due");
+    p.clock.innerHTML = "&ndash;&ndash;:&ndash;&ndash;<small>HKT · 香港時間</small>";
+    p.remark.textContent = "";
+    p.strip.style.transform = "translateY(0em)";
+    p.ring.style.strokeDasharray = RING_C.toFixed(2);
+    p.ring.style.strokeDashoffset = RING_C.toFixed(2);
+    p.bus.style.left = "3%";
+    p.rows.innerHTML =
+      '<li><span class="sk" style="width:100%"></span></li>' +
+      '<li><span class="sk" style="width:70%"></span></li>';
+  }
+
+  function stateRow(section, html, isError) {
+    const p = parts(section);
+    p.rows.innerHTML =
+      '<li class="state' + (isError ? " error" : "") + '">' + html + "</li>";
+    p.clock.innerHTML = "&ndash;&ndash;:&ndash;&ndash;<small>HKT · 香港時間</small>";
+    p.remark.textContent = "";
+    paintGauge(section, WINDOW_MIN, false);
+  }
+
+  function announceArrival(section, key) {
+    if (flashSeen.has(key)) return;
+    flashSeen.add(key);
+    section.classList.add("flash");
+    window.setTimeout(() => section.classList.remove("flash"), 1700);
+    if (!reduceMotion && typeof navigator.vibrate === "function") {
+      navigator.vibrate([90, 50, 90]);
     }
+  }
+
+  function renderBoard(board) {
+    const section = document.getElementById(board.id);
+    if (!section) return;
+
+    const entry = cache.get(board.id);
+    if (!entry) { skeleton(section); return; }
 
     const now = Date.now();
-    const visible = buses.filter((b) => b.eta.getTime() > now - 60000);
+    const visible = entry.buses.filter((b) => b.eta.getTime() > now - 90000);
 
     if (visible.length === 0) {
-      el.innerHTML =
-        '<li><div class="state">No upcoming B3A buses in the next hour.<br>暫時沒有班次</div></li>';
+      stateRow(section,
+        "No upcoming B3A buses in the next hour.<br>暫時沒有班次", false);
       return;
     }
 
-    el.innerHTML = visible
-      .slice(0, MAX_ROWS)
+    const p = parts(section);
+    const hero = visible[0];
+    const mins = minutesLeft(hero.eta);
+    const due = mins <= 0;
+
+    paintGauge(section, mins, due);
+
+    p.clock.innerHTML =
+      fmtClock(hero.eta) + "<small>HKT · 香港時間</small>";
+    p.remark.textContent = hero.remark || "";
+
+    if (due) {
+      announceArrival(section, board.id + "|" + hero.eta.toISOString());
+    }
+
+    p.rows.innerHTML = visible
+      .slice(1, 1 + MAX_ROWS)
       .map((b) => {
-        const mins = minutesLeft(b.eta);
-        const due = mins <= 0;
-        const remark = b.remark
-          ? '<div class="tag">' + escapeHtml(b.remark) + "</div>"
+        const m = minutesLeft(b.eta);
+        const tag = b.remark
+          ? '<span class="tag">' + escapeHtml(b.remark) + "</span>"
           : "";
         return (
           "<li>" +
-            '<div class="mins' + (due ? " due" : "") + '">' +
-              (due ? "Due" : mins + "<small>min</small>") +
-            "</div>" +
-            '<div class="meta">' + fmtClock(b.eta) + " HKT" + remark + "</div>" +
+            '<span class="m">' + (m <= 0 ? "0" : m) + "</span>" +
+            '<span class="u">min</span>' +
+            tag +
+            '<span class="t">' + fmtClock(b.eta) + "</span>" +
           "</li>"
         );
       })
       .join("");
+
+    if (!p.rows.innerHTML) {
+      p.rows.innerHTML = '<li class="state">No more buses listed · 暫無更多班次</li>';
+    }
   }
 
+  /* ---------- data ---------- */
   async function loadBoard(board) {
-    const el = document.getElementById(board.id);
+    const section = document.getElementById(board.id);
     try {
       const res = await fetch(API + board.stop + "/" + ROUTE, { cache: "no-store" });
       if (!res.ok) throw new Error("HTTP " + res.status);
@@ -405,19 +725,21 @@
       if (entry && Date.now() - entry.lastOk < 120000) {
         renderBoard(board); // keep last good values between blips
       } else {
-        el.innerHTML =
-          '<li><div class="state error">Live times unavailable. Check your connection and retry.</div></li>';
+        stateRow(
+          section,
+          "Live times unavailable. Check your connection and retry.<br>無法取得實時資料",
+          true
+        );
       }
     }
   }
 
   function refreshLive() {
     BOARDS.forEach(loadBoard);
-    updatedEl.textContent = fmtClock(new Date());
+    updatedEl.textContent = fmtClock(new Date()) + " HKT";
   }
 
-  // ---- Published timetable (Shenzhen Bay Port departures) ----------------
-  // Source: Citybus B3A timetable, 20 Apr 2024. Headways per time band.
+  /* ---------- published timetable ---------- */
   const SCHEDULE = {
     weekday: {
       label: "Mon–Fri",
@@ -473,17 +795,16 @@
   };
 
   function hkNow() {
-    const parts = new Intl.DateTimeFormat("en-GB", {
+    const bits = new Intl.DateTimeFormat("en-GB", {
       timeZone: "Asia/Hong_Kong",
       weekday: "short",
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
     }).formatToParts(new Date());
-    const get = (t) => (parts.find((p) => p.type === t) || {}).value;
+    const get = (t) => (bits.find((p) => p.type === t) || {}).value;
     const wd = get("weekday");
-    const day =
-      wd === "Sat" ? "saturday" : wd === "Sun" ? "sunday" : "weekday";
+    const day = wd === "Sat" ? "saturday" : wd === "Sun" ? "sunday" : "weekday";
     return { day, minutes: Number(get("hour")) * 60 + Number(get("minute")) };
   }
 
@@ -522,7 +843,7 @@
           now.minutes <= end;
         const when = b.single
           ? b.start
-          : b.start + '<span class="sep">–</span>' + b.end;
+          : b.start + '<span class="sep">&ndash;</span>' + b.end;
         return (
           "<li" + (isNow ? ' class="now"' : "") + ">" +
             '<span class="when">' + when + "</span>" +
@@ -535,13 +856,25 @@
       "</ul>";
   }
 
+  /* ---------- boot ---------- */
+  BOARDS.forEach((b) => {
+    const section = document.getElementById(b.id);
+    if (section) buildOdometer(section);
+  });
+
   refreshLive();
   setInterval(refreshLive, REFRESH_MS);
+
   // Re-render countdowns between network refreshes (no extra requests).
   setInterval(() => BOARDS.forEach(renderBoard), 10000);
 
   renderSchedule();
   setInterval(renderSchedule, 60000);
+
+  // Phones: refresh immediately when the tab comes back to the foreground.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) refreshLive();
+  });
 </script>
 </body>
 </html>
